@@ -57,5 +57,6 @@
   "undotree": { "branch": "main", "commit": "1c3e7531fad0a9c27942c5438be5adbd26260470" },
   "vim-be-good": { "branch": "master", "commit": "0ae3de14eb8efc6effe7704b5e46495e91931cc5" },
   "vim-maximizer": { "branch": "master", "commit": "2e54952fe91e140a2e69f35f22131219fcd9c5f1" },
-  "vim-tmux-navigator": { "branch": "master", "commit": "c45243dc1f32ac6bcf6068e5300f3b2b237e576a" }
+  "vim-tmux-navigator": { "branch": "master", "commit": "c45243dc1f32ac6bcf6068e5300f3b2b237e576a" },
+  "virt-column.nvim": { "branch": "master", "commit": "b87e3e0864211a32724a2ebf3be37e24e9e2fa99" }
 }

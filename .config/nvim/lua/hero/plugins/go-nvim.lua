@@ -6,7 +6,18 @@ return {
         "nvim-treesitter/nvim-treesitter",
     },
     config = function()
-        require("go").setup()
+        require("go").setup({
+            gofmt = "golines",
+
+            max_line_len = 120,
+
+            golines_args = {
+                "-m",
+                "120",
+                "--base-formatter",
+                "goimports",
+            },
+        })
     end,
     event = { "CmdlineEnter" },
     ft = { "go", "gomod" },
