@@ -166,3 +166,7 @@ symbol = " "
 
 [zig]
 symbol = " "
+
+[kubernetes]
+disabled = false
+format = "[$symbol($context)]($style) "
