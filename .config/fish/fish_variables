@@ -1,6 +1,5 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
-SETUVAR --export DOCKER_HOST:\x1d
 SETUVAR --export SOPS_AGE_KEY_FILE:/Users/I749992/\x2esops/key\x2etxt
 SETUVAR __fish_initialized:3800
 SETUVAR fish_color_autosuggestion:brblack
