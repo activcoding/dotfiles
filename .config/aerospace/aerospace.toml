@@ -20,7 +20,7 @@ after-login-command = []
 # export MIDNIGHT=0xFF3D59A1
 after-startup-command = [
     'exec-and-forget sketchybar',
-    'exec-and-forget borders active_color=0xFFC099FF inactive_color=0xff494d64 width=8.0'
+    # 'exec-and-forget borders active_color=0xFFC099FF inactive_color=0xff494d64 width=8.0'
 ]
 
 # Notify Sketchybar about workspace change
