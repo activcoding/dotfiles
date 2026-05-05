@@ -1,16 +1,16 @@
--- Require the sketchybar module
-sbar = require("sketchybar")
+os.execute("[ ! -d $HOME/.local/share/sketchybar_lua/ ] && (git clone https://github.com/FelixKratz/SbarLua.git /tmp/SbarLua && cd /tmp/SbarLua/ && make install && rm -rf /tmp/SbarLua/)")
 
--- Set the bar name, if you are using another bar instance than sketchybar
--- sbar.set_bar_name("bottom_bar")
+os.execute("[ ! -d $HOME/.local/share/rift.lua/ ] && (git clone https://github.com/acsandmann/rift.lua.git /tmp/rift.lua && cd /tmp/rift.lua/ && make install && rm -rf /tmp/rift.lua/)")
 
--- Bundle the entire initial configuration into a single message to sketchybar
-sbar.begin_config()
+package.cpath = package.cpath .. ";/Users/" .. os.getenv("USER") .. "/.local/share/sketchybar_lua/?.so" .. ";/Users/" .. os.getenv("USER") .. "/.local/share/rift.lua/?.so"
+
+
+SBAR = require("sketchybar")
+
+SBAR.begin_config()
+require("helpers.utils")
 require("bar")
 require("default")
 require("items")
-sbar.end_config()
-
--- Run the event loop of the sketchybar module (without this there will be no
--- callback functions executed in the lua module)
-sbar.event_loop()
+SBAR.end_config()
+SBAR.event_loop()

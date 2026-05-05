@@ -1,11 +1,9 @@
--- Left items
 require("items.apple")
-require("items.spaces")
-require("items.menus")
-require("items.menu_spaces_toggle")
-require("items.front_app")
-
--- Right items
+-- require("items.menus")
+-- require("items.spaces")
 require("items.calendar")
-require("items.widgets")
+require("items.battery")
+require("items.wifi")
+require("items.cpu")
 require("items.media")
+require("items.volume")

@@ -1,5 +1,206 @@
-#!/usr/bin/env lua
+#!/usr/bin/env bash
 
--- Load the sketchybar-package and prepare the helper binaries
-require("helpers")
-require("init")
+# ── Colours ────────────────────────────────────────────────────────────────
+BAR_BG=0x4a181a22
+BAR_BORDER=0x2ab0b8cc
+PILL_BG=0x5a363537
+PILL_BORDER=0x1a363537
+WHITE=0xfff7f1ff
+GREY=0xff8b888f
+RED=0xfffc618d
+GREEN=0xff7bd88f
+BLUE=0xff5ad4e6
+YELLOW=0xfffce566
+ORANGE=0xfffd9353
+TRANSPARENT=0x00000000
+
+# ── Bar ────────────────────────────────────────────────────────────────────
+sketchybar --bar \
+  height=40 \
+  color=$BAR_BG \
+  border_color=$BAR_BORDER \
+  border_width=1 \
+  blur_radius=64 \
+  corner_radius=16 \
+  margin=16 \
+  y_offset=6 \
+  padding_left=4 \
+  padding_right=4 \
+  font_smoothing=true
+
+# ── Defaults ───────────────────────────────────────────────────────────────
+sketchybar --default \
+  updates=when_shown \
+  icon.font="SF Pro Display:Bold:14.0" \
+  icon.color=$WHITE \
+  icon.padding_left=6 \
+  icon.padding_right=4 \
+  label.font="SF Pro Display:Semibold:13.0" \
+  label.color=$WHITE \
+  label.padding_left=4 \
+  label.padding_right=6 \
+  background.height=28 \
+  background.corner_radius=9 \
+  padding_left=4 \
+  padding_right=4
+
+# ══════════════════════════════════════════════════════════════════════════
+# LEFT — Apple logo + Aerospace spaces
+# ══════════════════════════════════════════════════════════════════════════
+
+# Apple logo
+sketchybar --add item apple left \
+  --set apple \
+    icon=􀣺 \
+    icon.font="SF Pro Display:Semibold:20.0" \
+    icon.color=$WHITE \
+    icon.padding_left=8 \
+    icon.padding_right=8 \
+    label.drawing=false \
+    click_script="open -a 'System Preferences'"
+
+# Aerospace spaces — subscribe to space_change + aerospace_workspace_change
+# Displays all workspaces reported by aerospace; highlights the active one.
+sketchybar --add event aerospace_workspace_change
+
+for sid in 1 2 3 4 5 6 7 8 9; do
+  sketchybar --add item "space.$sid" left \
+    --set "space.$sid" \
+      icon=$sid \
+      icon.font="SF Pro Display:Bold:13.0" \
+      icon.color=$GREY \
+      icon.padding_left=8 \
+      icon.padding_right=8 \
+      label.drawing=false \
+      background.drawing=false \
+      background.color=$PILL_BG \
+      background.border_color=$PILL_BORDER \
+      background.border_width=1 \
+      background.height=26 \
+      background.corner_radius=8 \
+      click_script="aerospace workspace $sid" \
+      script="$HOME/.config/sketchybar/plugins/aerospace.sh $sid" \
+    --subscribe "space.$sid" aerospace_workspace_change
+done
+
+# ══════════════════════════════════════════════════════════════════════════
+# RIGHT — widgets
+# ══════════════════════════════════════════════════════════════════════════
+
+# ── Volume ────────────────────────────────────────────────────────────────
+sketchybar --add item volume right \
+  --set volume \
+    update_freq=5 \
+    icon=􀊩 \
+    background.color=$PILL_BG \
+    background.border_color=$PILL_BORDER \
+    background.border_width=1 \
+    script='
+      VOL=$(osascript -e "output volume of (get volume settings)")
+      MUTED=$(osascript -e "output muted of (get volume settings)")
+      if [ "$MUTED" = "true" ]; then
+        ICON="􀊣"
+      elif [ "$VOL" -gt 60 ]; then
+        ICON="􀊩"
+      elif [ "$VOL" -gt 30 ]; then
+        ICON="􀊧"
+      elif [ "$VOL" -gt 10 ]; then
+        ICON="􀊥"
+      else
+        ICON="􀊡"
+      fi
+      sketchybar --set volume icon="$ICON" label="${VOL}%"
+    ' \
+  --subscribe volume volume_change
+
+# ── CPU ───────────────────────────────────────────────────────────────────
+sketchybar --add item cpu right \
+  --set cpu \
+    update_freq=4 \
+    icon=􀫥 \
+    background.color=$PILL_BG \
+    background.border_color=$PILL_BORDER \
+    background.border_width=1 \
+    script='
+      LOAD=$(top -l 2 -n 0 | awk "/CPU usage/{print \$3}" | tail -1 | tr -d "%")
+      LOAD=${LOAD%.*}
+      if [ -z "$LOAD" ]; then LOAD=0; fi
+      if   [ "$LOAD" -gt 80 ]; then COL='"$RED"'
+      elif [ "$LOAD" -gt 60 ]; then COL='"$ORANGE"'
+      elif [ "$LOAD" -gt 30 ]; then COL='"$YELLOW"'
+      else COL='"$WHITE"'
+      fi
+      sketchybar --set cpu label="${LOAD}%" label.color="$COL"
+    '
+
+# ── Wifi ──────────────────────────────────────────────────────────────────
+sketchybar --add item wifi right \
+  --set wifi \
+    update_freq=10 \
+    icon=􀙇 \
+    background.color=$PILL_BG \
+    background.border_color=$PILL_BORDER \
+    background.border_width=1 \
+    script='
+      IP=$(ipconfig getifaddr en0 2>/dev/null)
+      if [ -n "$IP" ]; then
+        SSID=$(ipconfig getsummary en0 2>/dev/null | awk -F ' SSID : ' '/ SSID : /{print $2}')
+        [ -z "$SSID" ] && SSID="WiFi"
+        sketchybar --set wifi icon=􀙇 icon.color='"$WHITE"' label="$SSID"
+      else
+        sketchybar --set wifi icon=􀙈 icon.color='"$RED"' label="Off"
+      fi
+    ' \
+  --subscribe wifi wifi_change system_woke
+
+# ── Battery ───────────────────────────────────────────────────────────────
+sketchybar --add item battery right \
+  --set battery \
+    update_freq=60 \
+    background.color=$PILL_BG \
+    background.border_color=$PILL_BORDER \
+    background.border_width=1 \
+    script='
+      BATT=$(pmset -g batt)
+      PCT=$(echo "$BATT" | grep -o "[0-9]*%" | head -1 | tr -d "%")
+      CHARGING=$(echo "$BATT" | grep "AC Power")
+      if [ -n "$CHARGING" ]; then
+        ICON="􀢋"; COL='"$GREEN"'
+      elif [ "$PCT" -gt 80 ]; then
+        ICON="􀛨"; COL='"$GREEN"'
+      elif [ "$PCT" -gt 60 ]; then
+        ICON="􀺸"; COL='"$WHITE"'
+      elif [ "$PCT" -gt 40 ]; then
+        ICON="􀺶"; COL='"$WHITE"'
+      elif [ "$PCT" -gt 20 ]; then
+        ICON="􀛩"; COL='"$ORANGE"'
+      else
+        ICON="􀛪"; COL='"$RED"'
+      fi
+      sketchybar --set battery icon="$ICON" icon.color="$COL" label="${PCT}%"
+    ' \
+  --subscribe battery power_source_change system_woke
+
+# ── Clock ─────────────────────────────────────────────────────────────────
+sketchybar --add item clock right \
+  --set clock \
+    update_freq=10 \
+    icon.drawing=false \
+    label.font="SF Pro Display:Semibold:13.0" \
+    background.color=$PILL_BG \
+    background.border_color=$PILL_BORDER \
+    background.border_width=1 \
+    script='sketchybar --set clock label="$(date "+%a %d %b  %H:%M")"'
+
+# ── Trigger initial update ─────────────────────────────────────────────────
+sketchybar --update
+
+# Highlight the current workspace on startup
+FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null | tr -d "[:space:]")
+for sid in 1 2 3 4 5 6 7 8 9; do
+  if [ "$sid" = "$FOCUSED" ]; then
+    sketchybar --set "space.$sid" icon.color=$WHITE background.drawing=true
+  else
+    sketchybar --set "space.$sid" icon.color=$GREY background.drawing=false
+  fi
+done
