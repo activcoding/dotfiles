@@ -1,14 +1,16 @@
 return {
-    -- "catppuccin/nvim",
-    "cyberdream.nvim",
+    "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
-    opts = {},
     config = function()
         require("catppuccin").setup({
+            flavour = "mocha",
             transparent_background = true,
-            -- kitty = false,
             term_colors = true,
+            integrations = {
+                treesitter = true,
+                native_lsp = { enabled = true },
+            },
         })
         vim.cmd("colorscheme catppuccin")
     end,
