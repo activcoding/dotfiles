@@ -21,6 +21,7 @@ return {
             "gitcommit",
             "gitignore",
             "go",
+            "hcl",
             "gomod",
             "gosum",
             "gowork",
@@ -32,15 +33,14 @@ return {
             "proto",
             "python",
             "rego",
-            "ruby",
             "sql",
-            "svelte",
             "yaml",
-            "php",
         },
         auto_install = true,
     },
     config = function(_, opts)
+        vim.treesitter.language.register("hcl", { "terraform", "tf" })
+
         local TS = require("nvim-treesitter")
         TS.setup(opts)
 
